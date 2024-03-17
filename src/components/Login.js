@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 import Header from "./Header";
-import { CheckValidateData } from "../utils/Validate";
+import { CheckValidateData, CheckValidateData1 } from "../utils/Validate";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  //const name = useRef(null);
+  const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
 
@@ -17,6 +17,17 @@ const Login = () => {
       password.current.value
     );
     setErrorMessage(message);
+  };
+  const handleButtonClick1 = () => {
+    console.log(name)
+    console.log(email)
+    const message1 = CheckValidateData1(
+      name.current.value,
+      email.current.value,
+      password.current.value
+    );
+    console.log(message1);
+    setErrorMessage(message1);
   };
 
   const toggleSignInForm = () => {
@@ -40,7 +51,7 @@ const Login = () => {
         </h1>
         {!isSignInForm && (
           <input
-            //ref={name}
+            ref={name}
             type="text"
             placeholder="Full Name"
             className="p-4 my-4 w-full bg-gray-700 "
@@ -60,7 +71,7 @@ const Login = () => {
         />
         <p className="text-red-600 font-bold text-lg py-2">{errorMessage}</p>
         <button
-          onClick={handleButtonClick}
+          onClick={isSignInForm ? handleButtonClick : handleButtonClick1}
           className="p-4 my-4 bg-red-700 w-full  rounded-lg"
         >
           {isSignInForm ? "Sign In" : "Sign Up"}
