@@ -1,50 +1,40 @@
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../utils/firebase";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../utils/firebase";
 import { addUser, removeUser } from "../utils/userSlice";
 import { LOGO_URL } from "../utils/constant";
 
 
 const Header = () => {
   const navigate = useNavigate();
-  const user = useSelector(store => store.user);
   const dispatch = useDispatch();
-  const handleSignOut = () => {
-    signOut(auth)
-      .then(() => {
-        // Sign-out successful.
-        navigate("/");
-      })
-      .catch((error) => {
-        // An error happened.
-        navigate("/Error");
-      });
+  const user = useSelector((store) => store.user);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      // Optionally, show error to user
+      navigate("/Error");
+    }
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         const { uid, email, displayName, photoURL } = user;
-        dispatch(
-          addUser({
-            uid: uid,
-            email: email,
-            displayName: displayName,
-            photoURL: photoURL,
-          })
-        );
+        dispatch(addUser({ uid, email, displayName, photoURL }));
         navigate("/browse");
       } else {
         dispatch(removeUser());
         navigate("/");
       }
     });
-
-    //this will call unsubscribe when component unmount
-    return () => unsubscribe();
-  }, []);
+    return unsubscribe;
+  }, [dispatch, navigate]);
 
   return (
     <div className="absolute w-screen px-8 py-2 bg-gradient-to-b from-black z-10 flex justify-between">
@@ -53,12 +43,14 @@ const Header = () => {
         alt="logo"
         src={LOGO_URL}
       />
-      {user && <div className="flex p-2">
-        <img className="w-12 h-12 " alt="usericon" src={user?.photoURL} />
-        <button onClick={handleSignOut} className="font-bold text-white">
-          Sign Out
-        </button>
-      </div>}
+      {user && (
+        <div className="flex p-2 items-center gap-2">
+          <img className="w-12 h-12 rounded-full object-cover" alt="usericon" src={user?.photoURL} />
+          <button onClick={handleSignOut} className="font-bold text-white ml-2">
+            Sign Out
+          </button>
+        </div>
+      )}
     </div>
   );
 };
